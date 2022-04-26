@@ -17,17 +17,17 @@ usage:
 	@echo "python-testdeploy: build all and deploy to test PyPi"
 	@echo "tag:           tag the repository with the current version"
 
-install:
-	./install.sh
+install: python-sdist
+	python3 -m pip install src/dist/32blit-${LIBRARY_VERSION}.tar.gz
 
 uninstall:
-	./uninstall.sh
+	python3 -m pip uninstall --yes 32blit
 
 check:
 	@echo "Checking for trailing whitespace"
 	@! grep -IUrn --color "[[:blank:]]$$" --exclude-dir=sphinx --exclude-dir=.tox --exclude-dir=.git --exclude=PKG-INFO
 	@echo "Checking for DOS line-endings"
-	@! grep -IUrn --color "" --exclude="*.tmx" --exclude-dir=sphinx --exclude-dir=.tox --exclude-dir=.git --exclude=Makefile
+	@! grep -IUrn --color --exclude="*.tmx" --exclude-dir=sphinx --exclude-dir=.tox --exclude-dir=.git --exclude=Makefile
 	@echo "Checking src/CHANGELOG.txt"
 	@cat src/CHANGELOG.txt | grep ^${LIBRARY_VERSION}
 	@echo "Checking src/ttblit/__init__.py"
