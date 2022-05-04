@@ -6,10 +6,10 @@ import click
 from PIL import Image
 
 from ...core.palette import Colour, Palette
-from ...core.struct import struct_blit_image
+from ...core.struct import struct_blit_spritesheet
 from ..builder import AssetBuilder, AssetTool
 
-image_typemap = {
+sprite_typemap = {
     'image': {
         '.png': True,
         '.gif': True,
@@ -17,8 +17,8 @@ image_typemap = {
 }
 
 
-@AssetBuilder(typemap=image_typemap)
-def image(data, subtype, palette=None, transparent=None, strict=False, packed=True):
+@AssetBuilder(typemap=sprite_typemap)
+def spritesheet(data, subtype, cols, rows, palette=None, transparent=None, strict=False, packed=True):
     if palette is None:
         palette = Palette()
     else:
@@ -33,22 +33,27 @@ def image(data, subtype, palette=None, transparent=None, strict=False, packed=Tr
     # Since we already have bytes, we need to pass PIL an io.BytesIO object
     image = Image.open(io.BytesIO(data)).convert('RGBA')
     image = palette.quantize_image(image, transparent=transparent, strict=strict)
-    return struct_blit_image.build({
-        'type': None if packed else 'RW',  # None means let the compressor decide
+    image = palette.make_spritesheet(image, columns=cols, rows=rows, count=count)
+    return struct_blit_spritesheet.build({
+        'type': 'SH',  # None means let the compressor decide
         'data': {
             'width': image.size[0],
             'height': image.size[1],
+            'columns': cols,
+            'rows': rows,
             'palette': palette.tostruct(),
-            'pixels': image.tobytes(),
+            'sprites': image.tobytes(),
         },
     })
 
 
-@AssetTool(image, 'Convert images for 32Blit')
+@AssetTool(spritesheet, 'Convert sprites for 32Blit')
+@click.option('--columns', type=int, default=0, help='Number of sprites on the x axis')
+@click.option('--rows', type=int, default=0, help='Number of sprites on hte y axis')
 @click.option('--palette', type=pathlib.Path, help='Image or palette file of colours to use')
 @click.option('--transparent', type=Colour, default=None, help='Transparent colour')
 @click.option('--packed', type=click.Choice(['yes', 'no'], case_sensitive=False), default='yes', help='Pack into bits depending on palette colour count')
 @click.option('--strict/--no-strict', default=False, help='Reject colours not in the palette')
-def image_cli(input_file, input_type, packed, **kwargs):
+def sprite_cli(input_file, input_type, packed, **kwargs):
     packed = (packed.lower() == 'yes')
-    return image.from_file(input_file, input_type, packed=packed, **kwargs)
+    return spritesheet.from_file(input_file, input_type, packed=packed, **kwargs)

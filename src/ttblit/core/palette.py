@@ -1,6 +1,7 @@
 import argparse
 import logging
 import pathlib
+from pickletools import uint8
 import re
 import struct
 
@@ -129,6 +130,9 @@ class Palette():
                 output_image.putpixel((x, y), index)
 
         return output_image
+
+    def make_spritesheet(self, image, columns:uint8, rows:uint8):
+        return image
 
     def get_entry(self, r, g, b, a, remap_transparent=True, strict=False):
         if (r, g, b, a) in self.entries:

@@ -53,6 +53,19 @@ struct_blit_image_compressed = Struct(
 
 struct_blit_image = ImageCompressor(struct_blit_image_compressed)
 
+struct_blit_spritesheet = Struct(
+    'header' / Const(b'SPRITE'),
+    'type' / PaddedString(2, 'ASCII'),
+    'data' / Prefixed(ImageSizeAdapter(Int32ul), Struct(
+        'width' / Int16ul,
+        'height' / Int16ul,
+        'columns' / Int8ul,
+        'rows' / Int8ul,
+        'palette' / PrefixedArray(PaletteCountAdapter(Int8ul), struct_blit_pixel),
+        'sprites' / GreedyBytes,
+    ), includelength=True)
+)
+
 struct_blit_meta = Struct(
     'header' / Const(b'BLITMETA'),
     'data' / Prefixed(Int16ul, Struct(
