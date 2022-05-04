@@ -132,7 +132,24 @@ class Palette():
         return output_image
 
     def make_spritesheet(self, image, columns:uint8, rows:uint8):
-        return image
+        # image width and height
+        iw, ih = image.size
+
+        # the output image still has the same dimensions of the input one
+        output_image = Image.new('P', (iw, ih))
+
+        # sprite width and height
+        sw = iw / columns
+        sh = ih / rows
+
+        # sprite size
+        ss = sw * sh
+
+        # for r in range(rows):
+        #     for c in range(columns):
+                
+
+        return output_image
 
     def get_entry(self, r, g, b, a, remap_transparent=True, strict=False):
         if (r, g, b, a) in self.entries:
