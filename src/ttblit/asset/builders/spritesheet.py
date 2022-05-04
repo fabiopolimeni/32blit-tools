@@ -32,7 +32,7 @@ def spritesheet(data, subtype, columns=0, rows=0, palette=None, transparent=None
     # Since we already have bytes, we need to pass PIL an io.BytesIO object
     image = Image.open(io.BytesIO(data)).convert('RGBA')
     image = palette.quantize_image(image, transparent=transparent, strict=strict)
-    image = palette.make_spritesheet(image, columns=columns, rows=rows)
+    image_bytes = palette.make_spritesheet(image=image, columns=columns, rows=rows)
     return struct_blit_spritesheet.build({
         'type': 'SH',  # None means let the compressor decide
         'data': {
@@ -41,7 +41,7 @@ def spritesheet(data, subtype, columns=0, rows=0, palette=None, transparent=None
             'columns': columns,
             'rows': rows,
             'palette': palette.tostruct(),
-            'sprites': image.tobytes(),
+            'sprites': image_bytes,
         },
     })
 

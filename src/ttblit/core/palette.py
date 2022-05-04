@@ -131,12 +131,9 @@ class Palette():
 
         return output_image
 
-    def make_spritesheet(self, image, columns:uint8, rows:uint8):
+    def make_spritesheet(self, image:Image, columns:uint8, rows:uint8):
         # image width and height
         iw, ih = image.size
-
-        # the output image still has the same dimensions of the input one
-        output_image = Image.new('P', (iw, ih))
 
         # sprite width and height
         sw = iw / columns
@@ -145,11 +142,18 @@ class Palette():
         # sprite size
         ss = sw * sh
 
-        # for r in range(rows):
-        #     for c in range(columns):
-                
+        image_bytes = bytearray()
 
-        return output_image
+        for r in range(rows):
+            for c in range(columns):
+                x = c * sw
+                y = r * sh
+                w = x + sw
+                h = y + sh
+                cropped_image = image.crop((x, y, w, h))
+                image_bytes.extend(cropped_image.tobytes())
+
+        return image_bytes
 
     def get_entry(self, r, g, b, a, remap_transparent=True, strict=False):
         if (r, g, b, a) in self.entries:
